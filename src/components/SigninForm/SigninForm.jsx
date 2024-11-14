@@ -1,14 +1,13 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import * as authService from "../../services/authService"
+import * as authService from "../../services/authService" // import the authservice
 
-const SignupForm = (props) => {
-  const navigate = useNavigate()
+const SigninForm = (props) => {
+  const navigate = useNavigate() // added this for navigation purposes
   const [message, setMessage] = useState([""])
   const [formData, setFormData] = useState({
     username: "",
-    password: "",
-    passwordConf: ""
+    password: ""
   })
 
   const updateMessage = (msg) => {
@@ -16,37 +15,34 @@ const SignupForm = (props) => {
   }
 
   const handleChange = (e) => {
+    updateMessage("")
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    updateMessage("")
     try {
-      props.setUser(formData) // this will modify the state in the App component
-      navigate("/") // upon redirect you will see the "Dashboard" page
+      const user = await authService.signin(formData) // TODO build signin service function
+
+      props.setUser(user)
+      navigate("/")
     } catch (err) {
       updateMessage(err.message)
     }
   }
 
-  const { username, password, passwordConf } = formData
-
-  const isFormInvalid = () => {
-    return !(username && password && password === passwordConf)
-  }
-
   return (
     <main>
-      <h1>Sign Up</h1>
+      <h1>Log In</h1>
       <p>{message}</p>
-      <form onSubmit={handleSubmit}>
+      <form autoComplete="off" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="username">Username:</label>
+          <label htmlFor="email">Username:</label>
           <input
             type="text"
-            id="name"
-            value={username}
+            autoComplete="off"
+            id="username"
+            value={formData.username}
             name="username"
             onChange={handleChange}
           />
@@ -55,24 +51,15 @@ const SignupForm = (props) => {
           <label htmlFor="password">Password:</label>
           <input
             type="password"
+            autoComplete="off"
             id="password"
-            value={password}
+            value={formData.password}
             name="password"
             onChange={handleChange}
           />
         </div>
         <div>
-          <label htmlFor="confirm">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirm"
-            value={passwordConf}
-            name="passwordConf"
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <button disabled={isFormInvalid()}>Sign Up</button>
+          <button>Log In</button>
           <Link to="/">
             <button>Cancel</button>
           </Link>
@@ -82,4 +69,4 @@ const SignupForm = (props) => {
   )
 }
 
-export default SignupForm
+export default SigninForm
